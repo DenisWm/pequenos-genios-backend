@@ -1,6 +1,5 @@
 package com.pequenosgenios.pg.resources;
 
-import com.pequenosgenios.pg.dto.NewTeacherDTO;
 import com.pequenosgenios.pg.dto.TeacherDTO;
 import com.pequenosgenios.pg.services.impl.TeacherService;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,7 @@ public class TeacherResource {
     }
 
     @GetMapping
-    public ResponseEntity<Page<NewTeacherDTO>> findAll(Pageable pageable) {
+    public ResponseEntity<Page<TeacherDTO>> findAll(Pageable pageable) {
         return ResponseEntity.ok(this.teacherService.findAll(pageable));
     }
 
@@ -30,13 +29,18 @@ public class TeacherResource {
         return ResponseEntity.ok(this.teacherService.findById(id));
     }
 
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Page<TeacherDTO>> findByName(@PathVariable String name, Pageable pageable) {
+        return ResponseEntity.ok(this.teacherService.findByName(name, pageable));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TeacherDTO> update(@PathVariable Long id, @RequestBody TeacherDTO teacherDTO) {
         return ResponseEntity.accepted().body(this.teacherService.update(id, teacherDTO));
     }
 
     @PostMapping
-    public ResponseEntity<TeacherDTO> insert(@RequestBody NewTeacherDTO newTeacherDTO) {
+    public ResponseEntity<TeacherDTO> insert(@RequestBody TeacherDTO newTeacherDTO) {
         TeacherDTO teacherDTO = this.teacherService.insert(newTeacherDTO);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()

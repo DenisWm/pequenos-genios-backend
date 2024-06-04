@@ -1,8 +1,6 @@
 package com.pequenosgenios.pg.services.impl;
 
 import com.pequenosgenios.pg.domain.Student;
-import com.pequenosgenios.pg.dto.AddressDTO;
-import com.pequenosgenios.pg.dto.NewStudentDTO;
 import com.pequenosgenios.pg.dto.StudentDTO;
 import com.pequenosgenios.pg.repositories.StudentRepository;
 import com.pequenosgenios.pg.services.Util;
@@ -22,35 +20,17 @@ public class StudentService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public StudentDTO insert(NewStudentDTO newStudentDTO) {
-        AddressDTO addressDTO = new AddressDTO();
+    public StudentDTO insert(StudentDTO newStudentDTO) {
+        Student model = new Student(newStudentDTO);
 
-        addressDTO.setCep(newStudentDTO.getCep());
-        addressDTO.setCity(newStudentDTO.getCity());
-        addressDTO.setCountry(newStudentDTO.getCountry());
-        addressDTO.setNumber(newStudentDTO.getNumber());
-        addressDTO.setState(newStudentDTO.getState());
-        addressDTO.setDistrict(newStudentDTO.getDistrict());
-        addressDTO.setStreet(newStudentDTO.getStreet());
-        addressDTO = this.addressService.insert(addressDTO);
-
-        StudentDTO studentDTO = new StudentDTO();
-
-        studentDTO.setAddress(addressDTO);
-        studentDTO.setName(newStudentDTO.getName());
-        studentDTO.setFees(newStudentDTO.getFees());
-        studentDTO.setEmailAddress(newStudentDTO.getEmailAddress());
-        studentDTO.setPhoneNumber(newStudentDTO.getPhoneNumber());
-
-        Student model = new Student(studentDTO);
         model = this.studentRepository.save(model);
-        studentDTO.setId(model.getId());
-        return studentDTO;
+        newStudentDTO.setId(model.getId());
+        return newStudentDTO;
     }
 
     @Transactional(readOnly = true)
-    public Page<NewStudentDTO> findAll(Pageable pageable) {
-        return this.studentRepository.findAll(pageable).map(NewStudentDTO::new);
+    public Page<StudentDTO> findAll(Pageable pageable) {
+        return this.studentRepository.findAll(pageable).map(StudentDTO::new);
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +40,6 @@ public class StudentService {
 
     @Transactional(rollbackFor = Exception.class)
     public StudentDTO update(Long id, StudentDTO studentDTO) {
-        this.addressService.update(studentDTO.getAddress().getId(), studentDTO.getAddress());
 
         StudentDTO fromDatabase = this.findById(id);
         Util.myCopyProperties(studentDTO, fromDatabase);
@@ -78,4 +57,7 @@ public class StudentService {
                 .orElseThrow(() -> new RuntimeException("not found"));
     }
 
+    public Page<StudentDTO> findByName(String name, Pageable pageable) {
+        return this.studentRepository.findAllByNameContainsIgnoreCase(name, pageable).map(StudentDTO::new);
+    }
 }
